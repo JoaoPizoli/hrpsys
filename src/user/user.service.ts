@@ -12,6 +12,17 @@ export class UserService {
         private readonly userRepository: Repository<UserEntity>
     ){}
 
+
+    async findUserByName(name: string){
+        const user = await this.userRepository.findOneBy({ name: name })
+
+        if(!user){
+            throw new NotFoundException('Não foi possível encontrar o Usuario!')
+        }
+
+        return user
+    }
+
     async create(data: CreateUserDto) {
         const user = this.userRepository.create(data)
         await this.userRepository.save(user)

@@ -9,6 +9,7 @@ import { RotinaEntity } from 'src/rotina/entities/rotina.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, CompromissoEntity, RotinaEntity])],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService],
+  exports: [UserService]
 })
 export class UserModule {}
