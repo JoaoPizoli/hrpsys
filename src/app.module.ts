@@ -9,10 +9,11 @@ import { RotinaService } from './rotina/rotina.service';
 import { RotinaController } from './rotina/rotina.controller';
 import { RotinaModule } from './rotina/rotina.module';
 import { AuthModule } from './auth/auth.module';
+import { FinanceiroController } from './financeiro/financeiro.controller';
 
 @Module({
   imports: [UserModule, FinanceiroModule, CompromissoModule, RotinaModule, AuthModule],
-  controllers: [AppController, CompromissoController, RotinaController],
+  controllers: [AppController, CompromissoController, RotinaController, FinanceiroController],
   providers: [AppService, RotinaService],
 })
 export class AppModule {}

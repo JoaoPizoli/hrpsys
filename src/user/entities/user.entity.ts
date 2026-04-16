@@ -1,6 +1,8 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { CompromissoEntity } from "src/compromisso/entities/compromisso.entity";
 import { RotinaEntity } from "src/rotina/entities/rotina.entity";
+import { CategoriaFinanceiroEntity } from "src/financeiro/entities/categoria_financeiro.entity";
+
 
 @Entity({ name: 'user'})
 export class UserEntity {
@@ -21,4 +23,7 @@ export class UserEntity {
 
     @ManyToMany(()=> CompromissoEntity, comp => comp.usuario)
     compromissos: CompromissoEntity[];
+
+    @ManyToOne(() =>  CategoriaFinanceiroEntity, cf => cf.)
+    categoria_financeiro: CategoriaFinanceiroEntity[];
 }
