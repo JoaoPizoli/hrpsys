@@ -1,5 +1,5 @@
 import { IsEnum, IsString } from "class-validator";
-import { TipoCategoriaEnum } from "../enum/tipo-categoria.enum";
+import { TipoCategoriaEnum } from "../../enum/tipo-categoria.enum";
 
 
 export class CreateCategoriaDto {

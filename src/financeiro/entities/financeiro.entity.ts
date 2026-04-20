@@ -8,12 +8,18 @@ export class FinanceiroEntity {
     id: number;
 
     @Column()
+    ano: number;
+
+    @Column()
+    mes: number;
+
+    @Column({ default: 0 })
     valor_total_entrada_mes: number;
 
-    @Column()
+    @Column({ default: 0 })
     valor_total_despesa_mes: number;
 
-    @Column()
+    @Column({ default: 0 })
     valor_final_mes: number;
 
 }

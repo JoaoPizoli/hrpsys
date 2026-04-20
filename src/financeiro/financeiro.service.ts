@@ -4,12 +4,14 @@ import { CategoriaFinanceiroEntity } from './entities/categoria_financeiro.entit
 import { FinanceiroEntity } from './entities/financeiro.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateEntradaFinanceiraDto } from './dto/create-entrada_financeira.dto';
-import { UpdateEntradaFinanceiraDto } from './dto/update-entrada-financeira.dto';
-import { CreateCategoriaDto } from './dto/create-categoria.dto';
-import { UpdateCategoriaDto } from './dto/update-categoria.dto';
+import { CreateEntradaFinanceiraDto } from './dto/entrada-financeiro/create-entrada_financeira.dto';
+import { UpdateEntradaFinanceiraDto } from './dto/entrada-financeiro/update-entrada-financeira.dto';
+import { CreateCategoriaDto } from './dto/categoria-financeiro/create-categoria.dto';
+import { UpdateCategoriaDto } from './dto/categoria-financeiro/update-categoria.dto';
 import { TipoCategoriaEnum } from './enum/tipo-categoria.enum';
-import { findMonth } from './utils/entrada_financeiro.utils';
+import { CreateFinanceiroDto } from './dto/financeiro/create-financeiro.dto';
+import { getMonth, getYear } from './utils/financeiro.utils';
+
 
 
 @Injectable()
@@ -46,7 +48,7 @@ export class FinanceiroService {
         const categoria = await this.categoriaRepository.findOneBy({ id: id })
         
         if(!categoria){
-            throw new NotFoundException('Categoria not found!');
+            throw new NotFoundException('Categoria Not Found!');
         }
 
         return categoria
@@ -61,29 +63,58 @@ export class FinanceiroService {
 
     async createEntradaFinanceira(data: CreateEntradaFinanceiraDto){
         await this.findOneCategoria(data.categoria_id)
+        const mesAtual = getMonth()
+        const anoAtual = getYear()
+
+        if(data.credito === true && data.parcelas){
+            const entradas: Array<CreateEntradaFinanceiraDto> = []
+
+            for(let i = 0; i < data.parcelas ; i++){
+
+                let mes = mesAtual + i
+                if(mesAtual === 12) {
+                    mes = 1
+                }
+
+                const entradaObj: CreateEntradaFinanceiraDto = {
+                    ...data,
+                    ano: anoAtual,
+                    mes: mes,  
+                }
+                entradas.push(entradaObj)
+            }
+
+
+            await this.entradasFinanceiraRepository.save(entradas)
+            await this.updateOrCreateFinanceiro(data)
+        }
         const entradaFinanceira = this.entradasFinanceiraRepository.create(data)
         return await this.entradasFinanceiraRepository.save(entradaFinanceira)
     }
+
 
     async updateEntradaFinanceira(id: number, data: UpdateEntradaFinanceiraDto){
         await this.findOneEntradaFinanceira(id)
         return await this.entradasFinanceiraRepository.update(id, data)
     }
 
+
     async deleteEntradaFinanceira(id: number){
         await this.findOneEntradaFinanceira(id)
         await this.entradasFinanceiraRepository.delete(id)
     }
 
+
     async findOneEntradaFinanceira(id: number){
         const entrada = await this.entradasFinanceiraRepository.findOneBy({ id: id })
 
         if(!entrada){
-            throw new NotFoundException('Entrada Financeira not found!')
+            throw new NotFoundException('Entrada Financeira Not Found!')
         }
 
         return entrada
     }
+
 
     async findAllEntradaFinanceira(){
         return await this.entradasFinanceiraRepository.find()
@@ -104,28 +135,58 @@ export class FinanceiroService {
         })
 
         if(!entradas) {
-            throw new NotFoundException('Entradas by Categoria not found!');
+            throw new NotFoundException('Entradas by Categoria Not Found!');
         }
 
     }
 
-    async findEntradasByTipoCategoria(tipo: TipoCategoriaEnum){
-        const entradas = await this.categoriaRepository.find({
-            relations: {
-                entradas_financeiro: true,
-            },
+
+ // Financeiro Services
+
+    async updateOrCreateFinanceiro(data: CreateEntradaFinanceiraDto){
+        const financeiro = await this.financeiroRepository.findOne({
             where: {
-                tipo: tipo
+                mes: data.mes,
+                ano: data.ano,
             }
         })
 
-        if(!entradas){
-            throw new NotFoundException('Entradas by Tipo Categoria not found!')
+        let valor_entrada = 0
+        let valor_despesa = 0
+        
+        if(data.tipo === TipoCategoriaEnum.DESPESA){
+            valor_despesa = data.valor
+        } else if (data.tipo === TipoCategoriaEnum.ENTRADA){
+            valor_entrada = data.valor
         }
+
+        const valormes = valor_entrada - valor_despesa
+
+        if(!financeiro){
+            await this.financeiroRepository.save({
+                ano: getYear(),
+                mes: getMonth(),
+                valor_total_entrada_mes: valor_entrada,
+                valor_total_despesa_mes: valor_despesa,
+                valor_final_mes: valormes,
+            })
+            
+        } else if(financeiro){
+            const total_entrada = financeiro.valor_total_entrada_mes + valor_entrada
+            const total_despesa = financeiro.valor_total_despesa_mes + valor_despesa 
+            const valor_final = total_entrada - total_despesa
+            return await this.financeiroRepository.update(financeiro.id, {
+                valor_total_entrada_mes: total_entrada,
+                valor_total_despesa_mes: total_despesa,
+                valor_final_mes: valor_final,
+            })
+        } else{
+            throw new Error('Não foi possível criar ou atualizar o financeiro!');
+        } 
     }
 
 
-    async 
-
-
+    
 }
+
+

@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { TipoCategoriaEnum } from "../enum/tipo-categoria.enum";
 import { EntradaFinanceiroEntity } from "./entrada_financeiro.entity";
 import { UserEntity } from "src/user/entities/user.entity";
 
@@ -11,9 +10,6 @@ export class CategoriaFinanceiroEntity {
 
     @Column()
     nome: string;
-
-    @Column({ type: 'enum', enum: TipoCategoriaEnum })
-    tipo: TipoCategoriaEnum;
 
     @OneToMany(()=> EntradaFinanceiroEntity, ef => ef.categorias)
     entradas_financeiro: EntradaFinanceiroEntity[];

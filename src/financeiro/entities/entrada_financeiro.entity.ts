@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { CategoriaFinanceiroEntity } from "./categoria_financeiro.entity";
+import { TipoCategoriaEnum } from "../enum/tipo-categoria.enum";
 
 @Entity({ name: 'entrada_financeiro' })
 export class EntradaFinanceiroEntity {
@@ -20,11 +21,23 @@ export class EntradaFinanceiroEntity {
     @Column()
     valor: number;
 
+    @Column({ type: 'enum', enum: TipoCategoriaEnum })
+    tipo: TipoCategoriaEnum;
+
+    @Column()
+    ano: number;
+
     @Column()
     mes: number;
 
-    @Column()
+    @Column({ default: false })
     recorrente: boolean;
+
+    @Column({ default: false })
+    credito?: boolean;
+
+    @Column({ default: 0 })
+    parcelas?: number;
 
     @Column({ default: false })
     pago: boolean;
@@ -37,12 +50,6 @@ export class EntradaFinanceiroEntity {
 
     @Column({ default: false })
     notificar: boolean;
-
-    @Column()
-    data_notificar: Date;
-
-    @Column()
-    hora_notificar: string;
 
     @CreateDateColumn()
     createdAt: Date;
